@@ -22,7 +22,7 @@ public abstract class BaseEntity implements Serializable {
     private Long id;
 
     @CreatedDate
-    private Date createDate;
+    private Date createDate = new Date(System.currentTimeMillis());
 
     private Long createBy;
 
@@ -32,8 +32,7 @@ public abstract class BaseEntity implements Serializable {
     private Date updateDate;
     private Long updateBy;
 
-    public BaseEntity(Date createDate, Long createBy, Date updateDate, Long updateBy) {
-        this.createDate = createDate;
+    public BaseEntity( Long createBy, Date updateDate, Long updateBy) {
         this.createBy = createBy;
         this.updateDate = updateDate;
         this.updateBy = updateBy;

@@ -16,6 +16,7 @@ import java.util.Optional;
 @Slf4j
 public class UserDetailService implements UserDetailsService {
 
+
     @Autowired
     private UserRepository userRepository;
 
@@ -29,7 +30,7 @@ public class UserDetailService implements UserDetailsService {
             //           return  null;
         }
         else {
-            log.info(String.format("Tìm thấy user %s in database",username));
+            log.info(String.format("Tìm thấy user {} in database",username));
         }
         return UserPrincipal.build(user.get());
     }

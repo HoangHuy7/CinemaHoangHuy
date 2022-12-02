@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,12 +22,17 @@ public class RoleService implements IRoleService {
     private RoleRepository roleRepository;
 
     @Override
+    public List<Role> findALl() {
+        return null;
+    }
+
+    @Override
     public Optional<Role> findById(Long id) {
         return roleRepository.findById(id);
     }
 
     @Override
-    public Role saveOrUpdate(Role role) {
+    public Role save(Role role) {
         return roleRepository.save(role);
     }
 
@@ -38,6 +44,11 @@ public class RoleService implements IRoleService {
     @Override
     public void delete(Long id) {
         roleRepository.deleteById(id);
+    }
+
+    @Override
+    public Role update(Role role) {
+        return null;
     }
 
     @Override

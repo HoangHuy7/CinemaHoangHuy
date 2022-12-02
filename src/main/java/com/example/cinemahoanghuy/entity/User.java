@@ -1,9 +1,11 @@
 package com.example.cinemahoanghuy.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -23,21 +25,20 @@ public class User extends BaseEntity{
     @Column(nullable = false)
     private String fullName;
 
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    private List<Bill> bill;
+
     @ManyToMany(fetch = FetchType.EAGER,cascade=CascadeType.ALL)
     @JoinTable(name = "users_roles",
             joinColumns = {@JoinColumn(name = "user_id")},
             inverseJoinColumns = {@JoinColumn(name = "role_id")})
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @JsonIgnore
     private Set<Role> roles;
 
 
 
-    public User(Date createDate, Long createBy, Date updateDate, Long updateBy, String username, String password, String fullName) {
-        super(createDate, createBy, updateDate, updateBy);
-        this.username = username;
-        this.password = password;
-        this.fullName = fullName;
-    }
 }
 

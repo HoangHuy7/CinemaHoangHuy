@@ -4,7 +4,6 @@ package com.example.cinemahoanghuy.security;
 import com.example.cinemahoanghuy.entity.Permission;
 import com.example.cinemahoanghuy.entity.Role;
 import com.example.cinemahoanghuy.entity.User;
-import lombok.Builder;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

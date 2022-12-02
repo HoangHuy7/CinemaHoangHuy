@@ -6,19 +6,32 @@ import com.example.cinemahoanghuy.repo.RoleRepository;
 import com.example.cinemahoanghuy.repo.UserRepository;
 import com.example.cinemahoanghuy.service.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.expression.spel.ast.OpInc;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 @Service
-
 public class UserService implements IUserService {
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    private RoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+
+    public UserService(UserRepository userRepository, RoleRepository roleRepository) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+    }
+
+    @Override
+    public List<User> findALl() {
+        return userRepository.findAll();
+    }
 
     @Override
     public Optional<User> findById(Long id) {
@@ -26,7 +39,7 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User saveOrUpdate(User user) {
+    public User save(User user) {
         return userRepository.save(user);
     }
 
@@ -41,17 +54,32 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username).get();
+    @Transactional
+    public User update(User userNew) {
+        User userOld = userRepository.findByUsername(userNew.getUsername()).orElse(null);
+        if (userOld != null) {
+            userOld.setUpdateDate(new Date(System.currentTimeMillis()));
+            userOld.setPassword(passwordEncoder.encode(userNew.getPassword()));
+            userOld.setFullName(userNew.getFullName());
+            userOld.setUpdateBy(userNew.getUpdateBy());
+        }
+        return userOld;
     }
 
-    @Override @Transactional
+    @Override
+    public Optional<User> findByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
+    @Transactional
     public void addRoleToUser(String username, String roleName) {
-        User user = userRepository.findByUsername(username).get();
-        Role role = roleRepository.findByName(roleName).get();
+        Optional<User> user = userRepository.findByUsername(username);
+        Optional<Role> role = roleRepository.findByName(roleName);
+        if (user.isPresent() && role.isPresent()) {
+            user.get().getRoles().add(role.get());
+        }
 
-
-        user.getRoles().add(role);
 
     }
 }

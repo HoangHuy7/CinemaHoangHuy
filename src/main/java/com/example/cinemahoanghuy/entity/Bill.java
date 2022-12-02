@@ -1,20 +1,28 @@
 package com.example.cinemahoanghuy.entity;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.Set;
+import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
-@Table(name = "t_bill")
+@Table(name = "t_Bill")
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class Bill extends BaseEntity{
 
-    @ManyToOne
-    @JoinColumn(nullable = false,name = "user_id")
+    @ManyToOne(cascade = CascadeType.MERGE,fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id")
     private User user;
+    @Column(columnDefinition = "DECIMAL(18,0)")
+    private BigDecimal total;
+    private Integer quantityTicket;
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Ticket> tickets;
 }

@@ -8,34 +8,57 @@ import com.example.cinemahoanghuy.entity.User;
 import com.example.cinemahoanghuy.security.UserPrincipal;
 import com.example.cinemahoanghuy.service.IUserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @RestController
-@RequestMapping("/api/v1/token")
 @Slf4j
-public class AuthenController {
+@RequiredArgsConstructor
+@RequestMapping("/api/v1/authentication")
+@CrossOrigin("*")
+public class AuthenticationController {
 
-    private String jwtSecret = "huydeptraivodich";
 
-    @Autowired
-    private IUserService userService;
+    @Value("${cinemaHuy.app.jwtSecret}")
+    private String jwtSecret;
+    private final IUserService userService;
 
-    @GetMapping("/refresh")
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody User user) {
+        Optional<User> userIs = userService.findByUsername(user.getUsername());
+        if (userIs.isPresent()) {
+            return ResponseEntity.badRequest().body("Tài khoản đã tồn tại");
+        } else {
+            user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
+            User userNew = userService.save(user);
+            Map<String,Object> responseResult = new HashMap<>();
+            responseResult.put("username:",userNew.getUsername());
+            responseResult.put("fullName:",userNew.getFullName());
+            responseResult.put("createDate:",userNew.getCreateDate());
+            return ResponseEntity.ok().body(responseResult);
+        }
+    }
+
+
+    @GetMapping("/refresh_token")
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String authorizationHeader = request.getHeader(AUTHORIZATION);
         Map<String, String> resultResponse = new HashMap<>();
@@ -52,14 +75,14 @@ public class AuthenController {
                 if (toke_name.equals("access_token")) {
 
                     log.error("This is access token, pls enter refresh token");
-                    resultResponse.put("error","This is access token, pls enter refresh token");
-                    new ObjectMapper().writeValue(response.getOutputStream(),resultResponse );
+                    resultResponse.put("error", "This is access token, pls enter refresh token");
+                    new ObjectMapper().writeValue(response.getOutputStream(), resultResponse);
                     return;
                 }
 
 
                 String username = decodedJWT.getSubject();
-                User user = userService.findByUsername(username);
+                User user = userService.findByUsername(username).get();
                 UserPrincipal userPrincipal = UserPrincipal.build(user);
                 String access_token = JWT.create()
                         .withSubject(user.getUsername())
